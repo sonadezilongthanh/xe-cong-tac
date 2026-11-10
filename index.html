@@ -2,19 +2,40 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Quản lý xe</title>
-<script>location.replace("https://script.google.com/macros/s/AKfycbwLhg_gRGv-LCe3xVeEU0lJ2lF6sZWkC9FeGPCx71qxfD8heu6_XKVT83N2MXCwbsfScw/exec");</script>
-<meta http-equiv="refresh" content="1;url=https://script.google.com/macros/s/AKfycbwLhg_gRGv-LCe3xVeEU0lJ2lF6sZWkC9FeGPCx71qxfD8heu6_XKVT83N2MXCwbsfScw/exec">
+<link rel="icon" href="icon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1F4E79">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Quản lý xe">
+<script>
+  // Mở từ biểu tượng màn hình chính, hoặc link thường: vào thẳng app.
+  // Link có "?cai": ở lại trang này để người dùng thêm biểu tượng ra màn hình chính.
+  var APP = "https://script.google.com/macros/s/AKfycbwLhg_gRGv-LCe3xVeEU0lJ2lF6sZWkC9FeGPCx71qxfD8heu6_XKVT83N2MXCwbsfScw/exec";
+  var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+  if (standalone || !/[?&]cai\b/.test(location.search)) location.replace(APP);
+</script>
 <style>
   body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-       font-family:system-ui,-apple-system,sans-serif;background:#fff;color:#1a1a1a;padding:16px;box-sizing:border-box;text-align:center}
-  a{display:block;width:100%;max-width:360px;padding:18px;border-radius:12px;background:#0b63ce;color:#fff;
+       font-family:system-ui,-apple-system,sans-serif;background:#F4F6F9;color:#1B2430;padding:16px;box-sizing:border-box;text-align:center}
+  img{width:96px;height:96px;border-radius:22px}
+  h1{font-size:22px;margin:14px 0 6px}
+  .card{background:#fff;border-radius:12px;padding:16px;max-width:380px;width:100%;box-sizing:border-box;text-align:left;font-size:16px;line-height:1.5;margin-top:12px}
+  a.btn{display:block;width:100%;max-width:380px;box-sizing:border-box;padding:18px;border-radius:12px;background:#1F4E79;color:#fff;
     font-size:20px;font-weight:600;text-decoration:none;margin-top:16px}
 </style>
 </head>
 <body>
-  <p style="font-size:18px">Đang mở ứng dụng Quản lý xe…</p>
-  <a href="https://script.google.com/macros/s/AKfycbwLhg_gRGv-LCe3xVeEU0lJ2lF6sZWkC9FeGPCx71qxfD8heu6_XKVT83N2MXCwbsfScw/exec">Mở ứng dụng</a>
+  <img src="icon-192.png" alt="">
+  <h1>Quản lý xe</h1>
+  <div class="card">
+    <b>Thêm biểu tượng ra màn hình chính</b><br>
+    <b>iPhone:</b> mở trang này bằng Safari → bấm nút Chia sẻ (ô vuông có mũi tên) → <b>Thêm vào MH chính</b>.<br>
+    <b>Android:</b> mở bằng Chrome → bấm ⋮ → <b>Thêm vào màn hình chính</b> (hoặc <b>Cài đặt ứng dụng</b>).<br>
+    Sau đó mở app bằng biểu tượng "Quản lý xe".
+  </div>
+  <a class="btn" href="https://script.google.com/macros/s/AKfycbwLhg_gRGv-LCe3xVeEU0lJ2lF6sZWkC9FeGPCx71qxfD8heu6_XKVT83N2MXCwbsfScw/exec">Mở ứng dụng</a>
 </body>
 </html>
