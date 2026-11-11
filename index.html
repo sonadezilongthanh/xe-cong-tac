@@ -52,6 +52,13 @@
     <button class="btn ghost" id="askNo" type="button">Để sau</button>
   </div>
 
+  <!-- Face ID / vân tay: gọi ở trang này vì khung Apps Script của Google không được phép dùng. -->
+  <div id="bio" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="bioT">
+    <b id="bioT">Đăng nhập bằng Face ID / vân tay</b>
+    <button class="btn" id="bioYes" type="button">Xác thực</button>
+    <button class="btn ghost" id="bioNo" type="button">Hủy</button>
+  </div>
+
 <script src="push-config.js"></script>
 <script>
 (function () {
@@ -120,7 +127,37 @@
       send({ type: 'pushState', state: state() });
       if (state() === 'granted') enable(); else ask(true);
     } else if (d.type === 'askPush') ask(false);
+    else if (d.type === 'hello') bioCo.then(function (co) { send({ type: 'info', bio: co }); });
+    else if (d.type === 'bioAsk') {
+      bioReq = d;
+      $('bioT').textContent = d.op === 'create' ? 'Bật Face ID / vân tay cho ' + String(d.ten || '') : 'Đăng nhập bằng Face ID / vân tay';
+      $('bio').hidden = false;
+    }
   });
+
+  /* Face ID / vân tay (WebAuthn) tại trang này; rp = sonadezilongthanh.github.io. Nút bấm ở đây vì iPhone cần một lần chạm ngay trước khi gọi. */
+  var bioReq = null;
+  var bioCo = (window.PublicKeyCredential && PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable
+    ? PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(function () { return false; }) : Promise.resolve(false));
+  function b64(buf) { return btoa(String.fromCharCode.apply(null, new Uint8Array(buf))); }
+  function unb64(s) { return Uint8Array.from(atob(s), function (c) { return c.charCodeAt(0); }); }
+  function rand(n) { return crypto.getRandomValues(new Uint8Array(n)); }
+  function bioXong(d) { if (!bioReq) return; d.type = 'bioResult'; d.id = bioReq.id; bioReq = null; $('bio').hidden = true; send(d); }
+  $('bioNo').onclick = function () { bioXong({ ok: false, name: 'NotAllowedError', msg: 'Đã hủy' }); };
+  $('bioYes').onclick = function () {
+    var r = bioReq; if (!r) return;
+    var p = r.op === 'create'
+      ? navigator.credentials.create({ publicKey: {
+          challenge: rand(32), rp: { name: 'Quản lý xe' },
+          user: { id: rand(16), name: String(r.ten || ''), displayName: String(r.ten || '') },
+          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+          authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'discouraged' },
+          timeout: 60000, attestation: 'none' } }).then(function (c) { return { ok: true, credId: b64(c.rawId) }; })
+      : navigator.credentials.get({ publicKey: {
+          challenge: rand(32), allowCredentials: [{ type: 'public-key', id: unb64(String(r.credId || '')) }],
+          userVerification: 'required', timeout: 60000 } }).then(function () { return { ok: true }; });
+    p.then(bioXong, function (e) { bioXong({ ok: false, name: (e && e.name) || 'Error', msg: (e && e.message) || '' }); });
+  };
 })();
 </script>
 </body>
