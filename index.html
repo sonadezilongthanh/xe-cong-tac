@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Quản lý xe</title>
 <link rel="icon" href="icon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -10,32 +10,118 @@
 <meta name="theme-color" content="#1F4E79">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Quản lý xe">
-<script>
-  // Mở từ biểu tượng màn hình chính, hoặc link thường: vào thẳng app.
-  // Link có "?cai": ở lại trang này để người dùng thêm biểu tượng ra màn hình chính.
-  var APP = "https://script.google.com/macros/s/AKfycbwLhg_gRGv-LCe3xVeEU0lJ2lF6sZWkC9FeGPCx71qxfD8heu6_XKVT83N2MXCwbsfScw/exec";
-  var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
-  if (standalone || !/[?&]cai\b/.test(location.search)) location.replace(APP);
-</script>
 <style>
-  body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-       font-family:system-ui,-apple-system,sans-serif;background:#F4F6F9;color:#1B2430;padding:16px;box-sizing:border-box;text-align:center}
-  img{width:96px;height:96px;border-radius:22px}
+  html,body{margin:0;height:100%;background:#F4F6F9}
+  body{font-family:system-ui,-apple-system,sans-serif;color:#1B2430}
+  #app{position:fixed;inset:0;width:100%;height:100%;border:0;display:block}
+  #app[hidden],#guide[hidden],.sheet[hidden]{display:none}
+  #guide{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;text-align:center}
+  #guide img{width:96px;height:96px;border-radius:22px}
   h1{font-size:22px;margin:14px 0 6px}
   .card{background:#fff;border-radius:12px;padding:16px;max-width:380px;width:100%;box-sizing:border-box;text-align:left;font-size:16px;line-height:1.5;margin-top:12px}
-  a.btn{display:block;width:100%;max-width:380px;box-sizing:border-box;padding:18px;border-radius:12px;background:#1F4E79;color:#fff;
-    font-size:20px;font-weight:600;text-decoration:none;margin-top:16px}
+  .btn{display:block;width:100%;max-width:380px;box-sizing:border-box;padding:18px;border-radius:12px;border:0;background:#1F4E79;color:#fff;
+    font:600 20px system-ui,-apple-system,sans-serif;text-decoration:none;margin-top:16px;text-align:center;cursor:pointer}
+  .btn.ghost{background:transparent;color:#1F4E79;margin-top:6px;font-size:18px}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:10;background:#fff;border-radius:16px 16px 0 0;padding:20px 16px 24px;
+    box-shadow:0 -6px 24px rgba(0,0,0,.18);font-size:17px;line-height:1.5}
+  .sheet b{font-size:20px;display:block;margin-bottom:4px}
+  .sheet p{margin:0}
 </style>
 </head>
 <body>
-  <img src="icon-192.png" alt="">
-  <h1>Quản lý xe</h1>
-  <div class="card">
-    <b>Thêm biểu tượng ra màn hình chính</b><br>
-    <b>iPhone:</b> mở trang này bằng Safari → bấm nút Chia sẻ (ô vuông có mũi tên) → <b>Thêm vào MH chính</b>.<br>
-    <b>Android:</b> mở bằng Chrome → bấm ⋮ → <b>Thêm vào màn hình chính</b> (hoặc <b>Cài đặt ứng dụng</b>).<br>
-    Sau đó mở app bằng biểu tượng "Quản lý xe".
+  <!-- Hướng dẫn thêm biểu tượng: chỉ hiện với link có "?cai" khi chưa mở từ màn hình chính. -->
+  <div id="guide" hidden>
+    <img src="icon-192.png" alt="">
+    <h1>Quản lý xe</h1>
+    <div class="card">
+      <b>Thêm biểu tượng ra màn hình chính</b><br>
+      <b>iPhone:</b> mở trang này bằng Safari → bấm nút Chia sẻ (ô vuông có mũi tên) → <b>Thêm vào MH chính</b>.<br>
+      <b>Android:</b> mở bằng Chrome → bấm ⋮ → <b>Thêm vào màn hình chính</b> (hoặc <b>Cài đặt ứng dụng</b>).<br>
+      Sau đó mở app bằng biểu tượng "Quản lý xe". Mở từ biểu tượng mới nhận được thông báo trên điện thoại.
+    </div>
+    <a class="btn" href="./">Mở ứng dụng</a>
   </div>
-  <a class="btn" href="https://script.google.com/macros/s/AKfycbwLhg_gRGv-LCe3xVeEU0lJ2lF6sZWkC9FeGPCx71qxfD8heu6_XKVT83N2MXCwbsfScw/exec">Mở ứng dụng</a>
+
+  <iframe id="app" hidden title="Quản lý xe"
+    allow="camera *; clipboard-write *; publickey-credentials-get *; publickey-credentials-create *"></iframe>
+
+  <div id="ask" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="askT">
+    <b id="askT">Bật thông báo?</b>
+    <p>Nhận nhắc việc và cảnh báo ngay trên điện thoại. Số việc chưa xem hiện trên biểu tượng app.</p>
+    <button class="btn" id="askYes" type="button">Bật thông báo</button>
+    <button class="btn ghost" id="askNo" type="button">Để sau</button>
+  </div>
+
+<script src="push-config.js"></script>
+<script>
+(function () {
+  // App thật (Google Apps Script) chạy trong khung; trang này lo số trên biểu tượng + thông báo đẩy.
+  var APP = "https://script.google.com/macros/s/AKfycbwLhg_gRGv-LCe3xVeEU0lJ2lF6sZWkC9FeGPCx71qxfD8heu6_XKVT83N2MXCwbsfScw/exec";
+  var FB = 'https://www.gstatic.com/firebasejs/10.12.2/';
+  var APP_ORIGIN = /^https:\/\/[a-z0-9-]+-script\.googleusercontent\.com$/; // khung nội dung của Apps Script
+  var $ = function (id) { return document.getElementById(id); };
+  var standalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+
+  if (!standalone && /[?&]cai\b/.test(location.search)) { $('guide').hidden = false; return; }
+  $('app').src = APP;
+  $('app').hidden = false;
+
+  var appWin = null, appOrigin = '', reg = null;
+  function send(m) { if (!appWin) return; m.qlx = 1; try { appWin.postMessage(m, appOrigin); } catch (e) { /* bỏ qua */ } }
+  function state() { return ('Notification' in window && 'serviceWorker' in navigator) ? Notification.permission : 'unsupported'; }
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+
+  /** Số trên biểu tượng; lưu lại để service worker cộng tiếp khi có thông báo mới lúc app đóng. */
+  function badge(n) {
+    n = Math.max(0, parseInt(n, 10) || 0);
+    if (window.caches) caches.open('qlx').then(function (c) { return c.put('badge', new Response(String(n))); }).catch(function () {});
+    if (navigator.setAppBadge) (n ? navigator.setAppBadge(n) : navigator.clearAppBadge()).catch(function () {});
+  }
+
+  function loadScript(src) {
+    return new Promise(function (ok, bad) { var s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = bad; document.head.appendChild(s); });
+  }
+
+  /** Đã có quyền: đăng ký service worker; có cấu hình Firebase thì lấy token gửi cho app lưu. */
+  function enable() {
+    navigator.serviceWorker.register('sw.js').then(function (r) { reg = r; return navigator.serviceWorker.ready; }).then(function () {
+      if (!window.QLX_PUSH) return null;
+      return (window.firebase && firebase.messaging ? Promise.resolve()
+        : loadScript(FB + 'firebase-app-compat.js').then(function () { return loadScript(FB + 'firebase-messaging-compat.js'); }))
+        .then(function () {
+          if (!firebase.apps.length) firebase.initializeApp(QLX_PUSH.firebase);
+          return firebase.messaging().getToken({ vapidKey: QLX_PUSH.vapidKey, serviceWorkerRegistration: reg });
+        });
+    }).then(function (t) { if (t) send({ type: 'pushToken', token: t }); })
+      .catch(function (e) { if (window.console) console.warn('push', e); });
+  }
+
+  function ask(tuDong) {
+    if (state() !== 'default') return;
+    if (tuDong && Number(store('qlxHoiSau') || 0) > Date.now()) return;
+    $('ask').hidden = false;
+  }
+  $('askYes').onclick = function () {
+    $('ask').hidden = true;
+    var p = Notification.requestPermission(function () { /* Safari cũ dùng callback */ });
+    Promise.resolve(p).then(function () {
+      send({ type: 'pushState', state: state() });
+      if (state() === 'granted') enable();
+    });
+  };
+  $('askNo').onclick = function () { $('ask').hidden = true; store('qlxHoiSau', String(Date.now() + 7 * 864e5)); };
+
+  window.addEventListener('message', function (e) {
+    var d = e.data;
+    if (!APP_ORIGIN.test(e.origin) || !d || d.qlx !== 1) return;
+    appWin = e.source; appOrigin = e.origin;
+    if (d.type === 'badge') badge(d.n);
+    else if (d.type === 'login') {
+      send({ type: 'pushState', state: state() });
+      if (state() === 'granted') enable(); else ask(true);
+    } else if (d.type === 'askPush') ask(false);
+  });
+})();
+</script>
 </body>
 </html>
