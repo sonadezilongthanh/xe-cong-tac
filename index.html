@@ -128,14 +128,20 @@
       if (state() === 'granted') enable(); else ask(true);
     } else if (d.type === 'askPush') ask(false);
     else if (d.type === 'hello') bioCo.then(function (co) {
-      var sv = null; try { sv = JSON.parse(store('qlxBio') || 'null'); } catch (x) { /* bỏ qua */ }
-      send({ type: 'info', bio: co, saved: sv });
+      send({ type: 'info', bio: co, saved: json('qlxBio'), sess: json('qlxSess') });
     });
     else if (d.type === 'bioSave') store('qlxBio', d.v ? JSON.stringify(d.v) : ''); // bản ghi Face ID: iPhone giữ bộ nhớ trang này, không giữ của khung Google
+    else if (d.type === 'sessSave') store('qlxSess', d.v ? JSON.stringify(d.v) : ''); // phiên "Ghi nhớ đăng nhập", cùng lý do
     else if (d.type === 'bioAsk') {
-      bioReq = d;
-      $('bioT').textContent = d.op === 'create' ? 'Bật Face ID / vân tay cho ' + String(d.ten || '') : 'Đăng nhập bằng Face ID / vân tay';
-      $('bio').hidden = false;
+      // Thử gọi Face ID ngay (lần chạm trong app có thể được tính); iPhone từ chối tức thì thì mới hiện nút "Xác thực" để chạm lại.
+      bioReq = d; var t0 = Date.now();
+      bioRun(d).then(bioXong, function (e) {
+        if (bioReq !== d) return;
+        if (e && e.name === 'NotAllowedError' && Date.now() - t0 < 800) {
+          $('bioT').textContent = d.op === 'create' ? 'Bật Face ID / vân tay cho ' + String(d.ten || '') : 'Đăng nhập bằng Face ID / vân tay';
+          $('bio').hidden = false;
+        } else bioXong(bioErr(e));
+      });
     }
   });
 
@@ -148,9 +154,15 @@
   function rand(n) { return crypto.getRandomValues(new Uint8Array(n)); }
   function bioXong(d) { if (!bioReq) return; d.type = 'bioResult'; d.id = bioReq.id; bioReq = null; $('bio').hidden = true; send(d); }
   $('bioNo').onclick = function () { bioXong({ ok: false, name: 'NotAllowedError', msg: 'Đã hủy' }); };
+  function json(k) { try { return JSON.parse(store(k) || 'null'); } catch (x) { return null; } }
+  function bioErr(e) { return { ok: false, name: (e && e.name) || 'Error', msg: (e && e.message) || '' }; }
   $('bioYes').onclick = function () {
     var r = bioReq; if (!r) return;
-    var p = r.op === 'create'
+    $('bio').hidden = true;
+    bioRun(r).then(bioXong, function (e) { bioXong(bioErr(e)); });
+  };
+  function bioRun(r) {
+    return r.op === 'create'
       ? navigator.credentials.create({ publicKey: {
           challenge: rand(32), rp: { name: 'Quản lý xe' },
           user: { id: rand(16), name: String(r.ten || ''), displayName: String(r.ten || '') },
@@ -160,8 +172,7 @@
       : navigator.credentials.get({ publicKey: {
           challenge: rand(32), allowCredentials: [{ type: 'public-key', id: unb64(String(r.credId || '')) }],
           userVerification: 'required', timeout: 60000 } }).then(function () { return { ok: true }; });
-    p.then(bioXong, function (e) { bioXong({ ok: false, name: (e && e.name) || 'Error', msg: (e && e.message) || '' }); });
-  };
+  }
 })();
 </script>
 </body>
