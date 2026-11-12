@@ -127,7 +127,11 @@
       send({ type: 'pushState', state: state() });
       if (state() === 'granted') enable(); else ask(true);
     } else if (d.type === 'askPush') ask(false);
-    else if (d.type === 'hello') bioCo.then(function (co) { send({ type: 'info', bio: co }); });
+    else if (d.type === 'hello') bioCo.then(function (co) {
+      var sv = null; try { sv = JSON.parse(store('qlxBio') || 'null'); } catch (x) { /* bỏ qua */ }
+      send({ type: 'info', bio: co, saved: sv });
+    });
+    else if (d.type === 'bioSave') store('qlxBio', d.v ? JSON.stringify(d.v) : ''); // bản ghi Face ID: iPhone giữ bộ nhớ trang này, không giữ của khung Google
     else if (d.type === 'bioAsk') {
       bioReq = d;
       $('bioT').textContent = d.op === 'create' ? 'Bật Face ID / vân tay cho ' + String(d.ten || '') : 'Đăng nhập bằng Face ID / vân tay';
